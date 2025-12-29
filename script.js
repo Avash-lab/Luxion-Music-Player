@@ -75,8 +75,14 @@ let playing = false;
 let isShuffled = false;
 let isRepeating = false;
 let isDevPanelOpen = false;
+let isMobile = false;
+
+function detectMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
 
 $(document).ready(function() {
+    isMobile = detectMobile();
     initializePlayer();
     createPlaylist();
     setupEventListeners();
@@ -97,7 +103,55 @@ $(document).ready(function() {
     totalTimeEl.textContent = '3:28';
     
     loadSong(currentSong);
+    
+    if (isMobile) {
+        setupMobileFeatures();
+    }
 });
+
+function setupMobileFeatures() {
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    document.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+    }, false);
+    
+    document.addEventListener('touchend', function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, false);
+    
+    function handleSwipe() {
+        const swipeThreshold = 50;
+        const diff = touchStartX - touchEndX;
+        
+        if (Math.abs(diff) > swipeThreshold) {
+            if (diff > 0) {
+
+                nextSong();
+            } else {
+
+                prevSong();
+            }
+        }
+    }
+    
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function(event) {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
+    
+    const playlistContainer = document.querySelector('.playlist-container');
+    if (playlistContainer) {
+        playlistContainer.style.webkitOverflowScrolling = 'touch';
+    }
+}
 
 function initializeVideoBackground() {
     const video = document.getElementById('bgVideo');
@@ -122,41 +176,69 @@ function initializeVideoBackground() {
     video.style.left = '50%';
     video.style.transform = 'translate(-50%, -50%)';
     
-    const playVideo = () => {
-        const playPromise = video.play();
+    if (isMobile) {
+        video.preload = 'metadata';
+        video.playsInline = true;
+        video.setAttribute('muted', '');
+        video.setAttribute('playsinline', '');
         
-        if (playPromise !== undefined) {
-            playPromise.then(() => {
-                console.log('Video playing successfully');
-            }).catch(error => {
-                console.log('Video autoplay prevented:', error.name);
+        const playVideo = () => {
+            video.play().catch(e => {
+                console.log('Mobile video autoplay prevented');
                 
-                const enableVideoPlayback = () => {
-                    video.muted = true;
-                    video.play().then(() => {
-                        console.log('Video started after user interaction');
-
-                        document.removeEventListener('click', enableVideoPlayback);
-                        document.removeEventListener('touchstart', enableVideoPlayback);
-                        document.removeEventListener('keydown', enableVideoPlayback);
-                    }).catch(e => {
-                        console.log('Still cannot play video:', e);
-                    });
-                };
-                
-                document.addEventListener('click', enableVideoPlayback, { once: true });
-                document.addEventListener('touchstart', enableVideoPlayback, { once: true });
-                document.addEventListener('keydown', enableVideoPlayback, { once: true });
+                const videoOverlay = document.querySelector('.video-overlay');
+                if (videoOverlay) {
+                    videoOverlay.style.cursor = 'pointer';
+                    videoOverlay.addEventListener('click', function initVideo() {
+                        video.muted = true;
+                        video.play().then(() => {
+                            console.log('Video started after user interaction');
+                            if (videoOverlay) videoOverlay.style.display = 'none';
+                        }).catch(e => {
+                            console.log('Still cannot play video:', e);
+                        });
+                        videoOverlay.removeEventListener('click', initVideo);
+                    }, { once: true });
+                }
             });
-        }
-    };
-    
-    video.load();
-    
-    video.addEventListener('loadeddata', playVideo);
-    video.addEventListener('canplay', playVideo);
-    
-    setTimeout(playVideo, 1000);
+        };
+        
+        setTimeout(playVideo, 1000);
+    } else {
+
+        const playVideo = () => {
+            const playPromise = video.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    console.log('Video playing successfully');
+                }).catch(error => {
+                    console.log('Video autoplay prevented:', error.name);
+                    
+                    const enableVideoPlayback = () => {
+                        video.muted = true;
+                        video.play().then(() => {
+                            console.log('Video started after user interaction');
+                            document.removeEventListener('click', enableVideoPlayback);
+                            document.removeEventListener('touchstart', enableVideoPlayback);
+                            document.removeEventListener('keydown', enableVideoPlayback);
+                        }).catch(e => {
+                            console.log('Still cannot play video:', e);
+                        });
+                    };
+                    
+                    document.addEventListener('click', enableVideoPlayback, { once: true });
+                    document.addEventListener('touchstart', enableVideoPlayback, { once: true });
+                    document.addEventListener('keydown', enableVideoPlayback, { once: true });
+                });
+            }
+        };
+        
+        video.load();
+        video.addEventListener('loadeddata', playVideo);
+        video.addEventListener('canplay', playVideo);
+        setTimeout(playVideo, 1000);
+    }
     
     video.addEventListener('error', function(e) {
         console.error('Video error:', e);
@@ -165,7 +247,6 @@ function initializeVideoBackground() {
 }
 
 function initializePlayer() {
-
     song.addEventListener('timeupdate', updateProgress);
     song.addEventListener('ended', handleSongEnd);
     song.addEventListener('loadedmetadata', function() {
@@ -183,6 +264,12 @@ function initializePlayer() {
     nextBtn.addEventListener('click', nextSong);
     playBtn.addEventListener('click', togglePlayPause);
     prog.addEventListener('click', seek);
+    
+    if (isMobile) {
+        prog.addEventListener('touchstart', handleTouchProgress);
+        prog.addEventListener('touchmove', handleTouchProgress);
+    }
+    
     volumeSlider.addEventListener('input', adjustVolume);
     shuffleBtn.addEventListener('click', toggleShuffle);
     repeatBtn.addEventListener('click', toggleRepeat);
@@ -192,8 +279,18 @@ function initializePlayer() {
     song.volume = volumeSlider.value / 100;
 }
 
-function setupEventListeners() {
+function handleTouchProgress(e) {
+    e.preventDefault();
+    if (e.type === 'touchstart' || e.type === 'touchmove') {
+        const touch = e.touches[0];
+        const rect = prog.getBoundingClientRect();
+        const pos = ((touch.clientX - rect.left) / rect.width) * song.duration;
+        song.currentTime = Math.max(0, Math.min(pos, song.duration));
+        updateProgress();
+    }
+}
 
+function setupEventListeners() {
     devToggle.addEventListener('click', () => {
         toggleDevPanel();
     });
@@ -207,6 +304,14 @@ function setupEventListeners() {
             updateDevPanel();
         }
     });
+    
+    if (isMobile) {
+        document.addEventListener('click', function(e) {
+            if (isDevPanelOpen && !devPanel.contains(e.target) && !devToggle.contains(e.target)) {
+                closeDevPanel();
+            }
+        });
+    }
 }
 
 function toggleDevPanel() {
@@ -224,11 +329,8 @@ function closeDevPanel() {
 }
 
 function updateDevPanel() {
-
     playerStatusEl.textContent = playing ? 'PLAYING' : 'PAUSED';
-
     totalTracksEl.textContent = songsList.length;
-    
     nowPlayingTrackEl.textContent = currentSong + 1;
     
     const currentSongObj = songsList[currentSong];
@@ -452,7 +554,8 @@ function playMusic() {
 function seek(e) {
     if (song.duration && !isNaN(song.duration)) {
         const rect = prog.getBoundingClientRect();
-        const pos = ((e.clientX - rect.left) / rect.width) * song.duration;
+        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const pos = ((clientX - rect.left) / rect.width) * song.duration;
         song.currentTime = Math.max(0, Math.min(pos, song.duration));
     }
 }
@@ -506,5 +609,20 @@ function handleKeyboard(e) {
             break;
     }
 }
+
+window.addEventListener('orientationchange', function() {
+    setTimeout(function() {
+        if (isMobile) {
+
+            window.dispatchEvent(new Event('resize'));
+        }
+    }, 300);
+});
+
+document.addEventListener('touchmove', function(e) {
+    if (e.scale !== 1) {
+        e.preventDefault();
+    }
+}, { passive: false });
 
 window.addEventListener('load', initializeVideoBackground);
