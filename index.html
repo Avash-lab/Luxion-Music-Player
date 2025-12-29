@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <title>Luxion Player- Tej</title>
+</head>
+<body>
+   
+<div class="video-background">
+    <video autoplay muted loop playsinline id="bgVideo" 
+           preload="auto" 
+           disablepictureinpicture 
+           disableremoteplayback
+           webkit-playsinline>
+        <source src="assets/videos/background.mp4" type="video/mp4">
+        <!-- Add fallback sources if needed -->
+        <source src="assets/videos/background.webm" type="video/webm">
+    </video>
+    <div class="video-overlay"></div>
+</div>
+
+
+    <div class="particle-background"></div>
+    <div class="cyber-grid-overlay"></div>
+
+  
+    <div class="music-container">
+  
+        <div class="left-panel">
+        
+            <div class="player-header">
+                <div class="logo-container">
+                    <div class="logo-text">
+                        <h1>LUXION PLAYER</h1>
+                        <div class="version-tag">By Tej</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="disk-section">
+                <div class="disk-container">
+                    <div class="disk">
+                        <div class="circle"></div>
+                        <div id="cover" class="cover"></div>
+                    </div>
+                </div>
+
+                <div class="song-info">
+                    <div class="now-label">
+                        <i class="fas fa-play-circle"></i>
+                        NOW PLAYING
+                    </div>
+                    <div class="artist-name">Old Gurung Song</div>
+                    <div class="song-name">Ngai Mohrari Ngolo Aachyo Mroriba</div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="fill-bar"></div>
+                        </div>
+                        <div class="time">
+                            <span class="current-time">0:00</span>
+                            <span class="total-time">3:28</span>
+                        </div>
+                    </div>
+                    
+                    <div class="track-counter">
+                        <span id="track-current">1</span>
+                        <span class="track-slash">/</span>
+                        <span id="track-total">6</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="control-group">
+                    <i id="prev" class="control-btn fas fa-step-backward" title="Previous"></i>
+                    <i id="play" class="control-btn play-btn fas fa-play" title="Play/Pause"></i>
+                    <i id="next" class="control-btn fas fa-step-forward" title="Next"></i>
+                </div>
+                
+                <div class="mode-controls">
+                    <i id="shuffle" class="mode-btn fas fa-random" title="Shuffle"></i>
+                    <i id="repeat" class="mode-btn fas fa-redo" title="Repeat"></i>
+                </div>
+                
+                <div class="volume-control">
+                    <i class="fas fa-volume-up volume-icon"></i>
+                    <input type="range" id="volume" min="0" max="100" value="80" class="volume-slider">
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+         
+            <div class="playlist-header">
+                <h2><i class="fas fa-list-music"></i> PLAYLIST</h2>
+                <div class="playlist-stats">
+                    <span class="stat"><i class="fas fa-music"></i> 6 tracks</span>
+                </div>
+            </div>
+            
+            <div class="playlist-container">
+                <div class="playlist-items" id="playlist">
+              
+                </div>
+            </div>
+            
+            <div class="playlist-footer">
+                <div class="player-status">
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>Luxion Player</span>
+                    </div>
+ 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dev-panel-side" id="devPanel">
+        <div class="dev-panel-toggle" id="devToggle">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        
+        <div class="dev-panel-content">
+            <div class="dev-panel-header">
+                <h3><i class="fas fa-info-circle"></i> Info</h3>
+                <button class="close-panel">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="dev-panel-body">
+         
+                <div class="dev-info-section">
+                    <div class="dev-avatar">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="dev-info">
+                        <h4>Developer</h4>
+                        <p class="dev-tagline">TEJ</p>
+                    </div>
+                </div>
+                
+                <div class="status-section">
+                    <div class="status-box">
+                        <div class="status-label">
+                            <i class="fas fa-signal"></i>
+                            Status
+                        </div>
+                        <div class="status-value" id="playerStatus">ONLINE</div>
+                    </div>
+                </div>
+                
+                <div class="tracks-section">
+                    <div class="tracks-header">
+                        <i class="fas fa-music"></i>
+                        <span>Tracks</span>
+                    </div>
+                    
+                    <div class="tracks-grid">
+                        <div class="track-stat">
+                            <div class="track-label">Total</div>
+                            <div class="track-value" id="totalTracks">6</div>
+                        </div>
+                        
+                        <div class="track-stat">
+                            <div class="track-label">Playing</div>
+                            <div class="track-value" id="nowPlayingTrack">1</div>
+                        </div>
+                        
+                        <div class="track-stat full-width">
+                            <div class="track-label">Current Track</div>
+                            <div class="track-value-current" id="currentTrackName">Loading...</div>
+                        </div>
+                        
+                        <div class="track-stat full-width">
+                            <div class="track-label">Artist</div>
+                            <div class="track-value" id="currentArtist">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+  
+                <div class="dev-footer">
+                    <p class="dev-note">Luxion Player</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="background.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
