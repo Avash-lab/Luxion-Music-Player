@@ -43,7 +43,6 @@ const songsList = [
     },
 ];
 
-// DOM Elements - Player
 const artistName = document.querySelector('.artist-name');
 const musicName = document.querySelector('.song-name');
 const fillBar = document.querySelector('.fill-bar');
@@ -61,7 +60,6 @@ const trackCurrent = document.getElementById('track-current');
 const trackTotal = document.getElementById('track-total');
 const playlistEl = document.getElementById('playlist');
 
-// DOM Elements - Developer Panel (Side Panel)
 const playerStatusEl = document.getElementById('playerStatus');
 const totalTracksEl = document.getElementById('totalTracks');
 const nowPlayingTrackEl = document.getElementById('nowPlayingTrack');
@@ -71,7 +69,6 @@ const devToggle = document.getElementById('devToggle');
 const devPanel = document.getElementById('devPanel');
 const closePanel = document.querySelector('.close-panel');
 
-// Player State
 let song = new Audio();
 let currentSong = 0;
 let playing = false;
@@ -79,19 +76,16 @@ let isShuffled = false;
 let isRepeating = false;
 let isDevPanelOpen = false;
 
-// Initialize
 $(document).ready(function() {
     initializePlayer();
     createPlaylist();
     setupEventListeners();
     initializeVideoBackground();
     
-    // Set initial values for developer panel
     totalTracksEl.textContent = songsList.length;
     nowPlayingTrackEl.textContent = '1';
     playerStatusEl.textContent = 'READY';
     
-    // Set current track name with truncation if too long
     const firstSongName = songsList[0].name;
     currentTrackNameEl.textContent = firstSongName.length > 25 
         ? firstSongName.substring(0, 25) + '...' 
@@ -99,11 +93,9 @@ $(document).ready(function() {
     
     currentArtistEl.textContent = songsList[0].artist;
     
-    // Set player initial values
     trackTotal.textContent = songsList.length;
     totalTimeEl.textContent = '3:28';
     
-    // Start with first song loaded
     loadSong(currentSong);
 });
 
@@ -195,15 +187,13 @@ function initializePlayer() {
     shuffleBtn.addEventListener('click', toggleShuffle);
     repeatBtn.addEventListener('click', toggleRepeat);
     
-    // Keyboard controls
     document.addEventListener('keydown', handleKeyboard);
     
-    // Set initial volume
     song.volume = volumeSlider.value / 100;
 }
 
 function setupEventListeners() {
-    // Developer panel toggle
+
     devToggle.addEventListener('click', () => {
         toggleDevPanel();
     });
@@ -212,7 +202,6 @@ function setupEventListeners() {
         closeDevPanel();
     });
     
-    // Update dev panel when opened
     devPanel.addEventListener('transitionend', () => {
         if (devPanel.classList.contains('active')) {
             updateDevPanel();
@@ -235,23 +224,19 @@ function closeDevPanel() {
 }
 
 function updateDevPanel() {
-    // Update player status
+
     playerStatusEl.textContent = playing ? 'PLAYING' : 'PAUSED';
-    
-    // Update total tracks
+
     totalTracksEl.textContent = songsList.length;
     
-    // Update now playing track number
     nowPlayingTrackEl.textContent = currentSong + 1;
     
-    // Update current track name (truncate if too long)
     const currentSongObj = songsList[currentSong];
     const trackName = currentSongObj.name;
     currentTrackNameEl.textContent = trackName.length > 25 
         ? trackName.substring(0, 25) + '...' 
         : trackName;
     
-    // Update current artist
     currentArtistEl.textContent = currentSongObj.artist;
 }
 
@@ -287,12 +272,10 @@ function loadSong(index) {
     artistName.textContent = songItem.artist;
     musicName.textContent = songItem.name;
     
-    // Update dev panel if open
     if (isDevPanelOpen) {
         updateDevPanel();
     }
     
-    // Create new Audio object to avoid caching issues
     if (song) {
         song.pause();
         song = null;
@@ -300,22 +283,18 @@ function loadSong(index) {
     
     song = new Audio();
     
-    // Add error handling for audio loading
     song.addEventListener('error', function(e) {
         console.error('Audio loading error:', e);
         
-        // Update dev panel if open
         if (isDevPanelOpen) {
             playerStatusEl.textContent = 'ERROR';
         }
         
-        // Try next song if current fails
         setTimeout(() => {
             nextSong();
         }, 1000);
     });
     
-    // Load song
     try {
         song.src = songItem.src;
     } catch (error) {
@@ -323,7 +302,6 @@ function loadSong(index) {
         return;
     }
     
-    // Reattach event listeners to new audio object
     song.addEventListener('timeupdate', updateProgress);
     song.addEventListener('ended', handleSongEnd);
     song.addEventListener('loadedmetadata', function() {
@@ -332,7 +310,6 @@ function loadSong(index) {
         }
     });
     
-    // Set volume
     song.volume = volumeSlider.value / 100;
     
     if (songItem.cover) {
@@ -342,11 +319,9 @@ function loadSong(index) {
     trackCurrent.textContent = index + 1;
     updatePlaylistHighlight(index);
     
-    // Reset progress
     fillBar.style.width = '0%';
     currentTimeEl.textContent = '0:00';
     
-    // Update total time
     setTimeout(() => {
         if (song.duration && !isNaN(song.duration)) {
             totalTimeEl.textContent = formatTime(song.duration);
@@ -355,14 +330,12 @@ function loadSong(index) {
         }
     }, 100);
     
-    // If we were playing, continue playing
     if (playing) {
         song.play().then(() => {
             playBtn.classList.add('fa-pause');
             playBtn.classList.remove('fa-play');
             cover.classList.add('active');
             
-            // Update dev panel if open
             if (isDevPanelOpen) {
                 playerStatusEl.textContent = 'PLAYING';
             }
@@ -373,7 +346,6 @@ function loadSong(index) {
             playBtn.classList.add('fa-play');
             cover.classList.remove('active');
             
-            // Update dev panel if open
             if (isDevPanelOpen) {
                 playerStatusEl.textContent = 'ERROR';
             }
@@ -420,7 +392,6 @@ function togglePlayPause() {
     }
     playing = !playing;
     
-    // Update dev panel if open
     if (isDevPanelOpen) {
         playerStatusEl.textContent = playing ? 'PLAYING' : 'PAUSED';
     }
@@ -465,7 +436,6 @@ function playMusic() {
         playBtn.classList.remove('fa-play');
         cover.classList.add('active');
         
-        // Update dev panel if open
         if (isDevPanelOpen) {
             playerStatusEl.textContent = 'PLAYING';
         }
@@ -473,7 +443,6 @@ function playMusic() {
         console.error('Error playing music:', error);
         playing = false;
         
-        // Update dev panel if open
         if (isDevPanelOpen) {
             playerStatusEl.textContent = 'ERROR';
         }
