@@ -583,8 +583,6 @@ function handleSongEnd() {
     }
 }
 
-// Add these functions to your existing script.js
-
 function setupMobileScroll() {
     if (!isMobile) return;
     
@@ -593,10 +591,8 @@ function setupMobileScroll() {
     
     if (!playlistContainer || !musicContainer) return;
     
-    // Enable smooth scrolling on iOS
     playlistContainer.style.webkitOverflowScrolling = 'touch';
     
-    // Prevent body scroll when scrolling playlist
     let isScrollingPlaylist = false;
     
     playlistContainer.addEventListener('touchstart', function(e) {
@@ -605,7 +601,6 @@ function setupMobileScroll() {
     
     playlistContainer.addEventListener('touchmove', function(e) {
         if (isScrollingPlaylist) {
-            // Allow the playlist to scroll
             e.stopPropagation();
         }
     }, { passive: false });
@@ -614,48 +609,37 @@ function setupMobileScroll() {
         isScrollingPlaylist = false;
     }, { passive: true });
     
-    // Fix for iOS Safari rubber band effect
     document.body.style.overscrollBehavior = 'none';
     
-    // Allow music container to scroll if needed
     musicContainer.style.overflowY = 'auto';
     musicContainer.style.webkitOverflowScrolling = 'touch';
 }
 
-// Update the $(document).ready function to include:
 $(document).ready(function() {
     isMobile = detectMobile();
     
-    // ... existing initialization code ...
-    
-    // Mobile-specific setup
     if (isMobile) {
         setupMobileFeatures();
-        setupMobileScroll(); // Add this line
+        setupMobileScroll(); 
         
-        // Fix for iOS viewport
         fixIOSViewport();
     }
 });
 
-// Add this function for iOS fixes
 function fixIOSViewport() {
-    // Fix 100vh on iOS
+
     const setVH = () => {
         let vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
     };
     
-    // Apply initial fix
     setVH();
     
-    // Re-apply on resize/orientation change
     window.addEventListener('resize', setVH);
     window.addEventListener('orientationchange', function() {
         setTimeout(setVH, 100);
     });
     
-    // Apply the custom vh unit
     const style = document.createElement('style');
     style.textContent = `
         @media (max-width: 768px) {

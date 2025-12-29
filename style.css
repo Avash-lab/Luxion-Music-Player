@@ -1074,16 +1074,13 @@ body {
     }
 }
 
-/* Add these to your existing style.css */
-
-/* Fix scroll on mobile */
 .playlist-container {
     flex: 1;
     padding: 20px 30px;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    -webkit-overflow-scrolling: touch; 
     overflow-scrolling: touch;
-    overscroll-behavior: contain; /* Prevent pull-to-refresh */
+    overscroll-behavior: contain;
 }
 
 /* Mobile scroll fixes */
@@ -1091,12 +1088,11 @@ body {
     .playlist-container {
         padding: 15px 20px;
         max-height: 300px;
-        overflow-y: scroll; /* Ensure scrolling is enabled */
+        overflow-y: scroll; 
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
     }
     
-    /* Fix body scrolling on mobile */
     body {
         overflow-x: hidden;
         overflow-y: auto;
@@ -1105,18 +1101,16 @@ body {
         -webkit-overflow-scrolling: touch;
     }
     
-    /* Ensure music container doesn't interfere with scrolling */
     .music-container {
         overflow: visible;
     }
     
-    /* Make playlist items selectable but not interfere with scroll */
     .playlist-items {
-        touch-action: pan-y; /* Allow vertical scrolling */
+        touch-action: pan-y; 
     }
     
     .playlist-item {
-        -webkit-touch-callout: none; /* Prevent long-press menu on iOS */
+        -webkit-touch-callout: none; 
         user-select: none;
     }
 }
@@ -1127,13 +1121,10 @@ body {
         padding: 10px 15px;
     }
 }
-
-/* Prevent body scroll when dev panel is open */
 .dev-panel-side.active ~ .music-container {
     pointer-events: none;
 }
 
-/* Fix for iOS Safari 100vh issue */
 @supports (-webkit-touch-callout: none) {
     body {
         height: -webkit-fill-available;
